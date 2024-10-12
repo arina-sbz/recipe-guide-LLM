@@ -29,11 +29,11 @@ body {
   margin-bottom: 0.5rem; */
 }
 
-div[data-testid="stChatMessageAvatarUser"] {
+/* div[data-testid="stChatMessageAvatarUser"] {
   order: 1;
   margin-left: 10px;
 }
 
 div[data-testid="stHeadingWithActionElements"] {
   text-align: center;
-}
+} */
