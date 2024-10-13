@@ -79,7 +79,7 @@ def get_relevant_docs(user_query: str, embeddings_df, top_n=3):
     # print("Done Successfully")
 
     # Get the top n most relevant documents
-    relevant_docs = embeddings_df.nlargest(top_n, "similarity")["input"].tolist()
+    relevant_docs = embeddings_df.nlargest(top_n, "similarity")["qa_pairs"].tolist()
     # print(relevant_docs)
     # sorted_embeddings_df = embeddings_df.sort_values(by="similarity", ascending=False)
 
@@ -90,12 +90,13 @@ def make_rag_prompt(query, relevant_passage):
     # Ensure all elements in relevant_passage are strings before joining
     relevant_passage = " ".join([str(passage) for passage in relevant_passage])
     prompt = (
-        f"You are a helpful and informative recipe chatbot that answers questions using text from the reference passage included below.\n\n "
-        f"Add some extra information to make your response more helpful and engaging. \n\n"
-        f"only anwer the questions with the topic of the recipes,ingredients, directions and cooking methods.\n\n "
-        f"Maintain a friendly and conversational tone. If the passage is irrelevant, feel free to ignore it.\n\n"
-        f"Give the answer in a markdown format.\n\n"
-        f"If the answer contains Ingrediens, give them in a unordered list with a title format.\n\n"
+        f"You are a helpful and friendly recipe chatbot. Answer questions using the text from the reference passage below.\n\n"
+        f"Focus only on topics related to recipes, ingredients, directions, or cooking methods.\n"
+        f"If the question asks for a recipe that is not in the passage, acknowledge that you do not know.\n"
+        f"Provide extra details to make your response more engaging.\n"
+        f"Ignore the question if the passage is irrelevant.\n"
+        f"Format the answer in markdown. If listing ingredients, use an unordered list with a title.\n\n"
+        f"Do not mention the passage in the answer.\n\n"
         f"QUESTION: '{query}'\n"
         f"PASSAGE: '{relevant_passage}'\n\n"
         f"ANSWER:"
