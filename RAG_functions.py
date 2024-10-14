@@ -48,7 +48,9 @@ model.to(device)
 
 
 # Function to get embeddings from the model for a given text
-def get_embeddings(text: str):
+
+
+def get_embeddings(text):
     # Tokenize the input text and move it to the GPU
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(
         device
@@ -61,11 +63,9 @@ def get_embeddings(text: str):
 
 
 # Function to retrieve the top N most relevant documents based on cosine similarity between the user query and document embeddings
-def get_relevant_docs(user_query: str, embeddings_df, top_n=3):
-    # Convert the user query into embeddings
+def get_relevant_docs(user_query, dataframe, top_n=3):
     query_embeddings = np.array(get_embeddings(user_query))
-
-    # print(query_embeddings, type(query_embeddings))
+    print(query_embeddings, type(query_embeddings))
 
     def cosine_similarity(embedding):
         return float(
@@ -76,12 +76,8 @@ def get_relevant_docs(user_query: str, embeddings_df, top_n=3):
     embeddings_df["similarity"] = embeddings_df["embeddings"].apply(
         lambda x: cosine_similarity(np.array(x)[0])
     )
-    # print("Done Successfully")
 
-    # Get the top n most relevant documents
-    relevant_docs = embeddings_df.nlargest(top_n, "similarity")["qa_pairs"].tolist()
-    # print(relevant_docs)
-    # sorted_embeddings_df = embeddings_df.sort_values(by="similarity", ascending=False)
+    relevant_docs = embeddings_df.nlargest(top_n, "similarity")["input"].tolist()
 
     return relevant_docs
 
@@ -89,6 +85,7 @@ def get_relevant_docs(user_query: str, embeddings_df, top_n=3):
 def make_rag_prompt(query, relevant_passage):
     # Ensure all elements in relevant_passage are strings before joining
     relevant_passage = " ".join([str(passage) for passage in relevant_passage])
+
     prompt = (
         f"You are a helpful and friendly recipe chatbot. Answer questions using the text from the reference passage below.\n\n"
         f"Focus only on topics related to recipes, ingredients, directions, or cooking methods.\n"
@@ -114,7 +111,9 @@ def generate_response(chat, user_prompt):
 
 
 def generate_answer(query):
-    relevant_text = get_relevant_docs(query, embeddings_df)
+    relevant_text = get_relevant_docs(query, embeddings_df, 10)
+    print(relevant_text)
+    print("-------------------------------------------\n")
     prompt = make_rag_prompt(query, relevant_passage=relevant_text)
     answer = generate_response(chat, prompt)
     return answer
