@@ -9,6 +9,7 @@ import re
 assistant = genai.GenerativeModel("gemini-1.5-flash")
 chat = assistant.start_chat()
 
+
 # Load the tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 model = AutoModel.from_pretrained("bert-base-uncased")
@@ -48,8 +49,6 @@ model.to(device)
 
 
 # Function to get embeddings from the model for a given text
-
-
 def get_embeddings(text):
     # Tokenize the input text and move it to the GPU
     inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True).to(
@@ -63,9 +62,8 @@ def get_embeddings(text):
 
 
 # Function to retrieve the top N most relevant documents based on cosine similarity between the user query and document embeddings
-def get_relevant_docs(user_query, dataframe, top_n=3):
+def get_relevant_docs(user_query, embeddings_df, top_n=3):
     query_embeddings = np.array(get_embeddings(user_query))
-    print(query_embeddings, type(query_embeddings))
 
     def cosine_similarity(embedding):
         return float(
@@ -111,9 +109,7 @@ def generate_response(chat, user_prompt):
 
 
 def generate_answer(query):
-    relevant_text = get_relevant_docs(query, embeddings_df, 10)
-    print(relevant_text)
-    print("-------------------------------------------\n")
+    relevant_text = get_relevant_docs(query, embeddings_df, 3)
     prompt = make_rag_prompt(query, relevant_passage=relevant_text)
     answer = generate_response(chat, prompt)
     return answer
